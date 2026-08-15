@@ -1,26 +1,24 @@
 'use client'
 import {useRef} from 'react'
 import Image from 'next/image'
-import {gsap, useGSAP, Flip, ScrollSmoother, SplitText} from '@/src/lib/gsap'
+import {gsap, useGSAP, ScrollSmoother, SplitText} from '@/src/lib/gsap'
 import {projects} from '@/src/data/projects'
 import {site} from '@/src/data/site'
 import {onPageReveal} from '@/src/lib/loadGate'
 import {HeroConfetti} from '@/src/components/HeroConfetti'
-import {useTransition} from '@/src/components/transition/TransitionProvider'
 
 /** Hero disciplines, shown as pills tucked against the second headline line. */
-const HERO_TAGS = [...site.services, 'Editorial'] as const
+const HERO_TAGS = [...site.services, 'Shaders'] as const
 
 /**
  * /works index — a dark full-height hero over a list of project rows that
  * alternate side to side. Each row's frame swings in on its pinned corner as
- * it enters, and clicking one hands its Flip state to the detail hero (§7B).
+ * it enters. The rows are display only — the case-study pages they used to
+ * open have been removed.
  */
 export function WorksIndex() {
   const rootRef = useRef<HTMLElement>(null)
-  const {navigate, prefetch, isTransitioning} = useTransition()
-
-  const {contextSafe} = useGSAP(
+  useGSAP(
     () => {
       const root = rootRef.current
       if (!root) return
@@ -64,7 +62,7 @@ export function WorksIndex() {
         // headroom that pays for that slide; without it a fast scroll drags
         // an edge into view.
         if (smoother) {
-          rows.forEach((row, i) => {
+          rows.forEach((row) => {
             const inner = row.querySelector<HTMLElement>('[data-parallax]')
             if (!inner) return
             gsap.set(inner, {scale: 1.5})
@@ -119,8 +117,8 @@ export function WorksIndex() {
                 rotate: 0,
                 duration: 1.6,
                 ease: 'elastic.out(1, 0.4)',
-                // The frame is also the Flip source; hand it back with a clean
-                // transform so the morph measures it, not our hinge.
+                // Hand the frame back with a clean transform so nothing
+                // downstream inherits our hinge.
                 onComplete: () => gsap.set(frame, {clearProps: 'rotate,transformOrigin'}),
               },
               0,
@@ -153,12 +151,6 @@ export function WorksIndex() {
     {scope: rootRef},
   )
 
-  const openProject = contextSafe((slug: string, card: HTMLElement) => {
-    if (isTransitioning()) return
-    const state = Flip.getState(card)
-    navigate(`/works/${slug}`, {flip: {state, slug}})
-  })
-
   return (
     <main ref={rootRef} className="min-h-svh bg-white">
       {/* Full-viewport hero — black on black, three shades deep so the band
@@ -180,9 +172,15 @@ export function WorksIndex() {
               stagger reads as one block rather than two opposite corners.
               pr-[0.08em] pays back the -0.06em tracking the last glyph gives
               away — without it the line mask crops the final letter. */}
+          {/* leading-[1.06], not the sub-1 the display face usually wants:
+              Clash's content box is 1.14em (89/25 ascent/descent per 100px)
+              and the lines reveal out of SplitText masks, so a short line box
+              clips every descender — the g in "shipping", the y in "years".
+              The negative margin-bottom gives back the 0.28em the taller line
+              box adds, keeping the pair as tight as it looks at 0.78. */}
           <span
             data-hero-line
-            className="type-display mr-[6vw] block pr-[0.12em] text-right leading-[0.78]!"
+            className="type-display mr-[6vw] block pr-[0.12em] text-right leading-[1.06]! -mb-[0.28em]"
           >
             selected work
           </span>
@@ -192,7 +190,7 @@ export function WorksIndex() {
                 the final glyph. */}
             <span
               data-hero-line
-              className="type-display ml-[6vw] block shrink-0 pr-[0.12em] leading-[0.78]!"
+              className="type-display ml-[6vw] block shrink-0 pr-[0.12em] leading-[1.06]!"
             >
               for brands
             </span>
@@ -228,22 +226,10 @@ export function WorksIndex() {
             const imageLeft = i % 2 === 0
             return (
               <li key={p.slug} data-row className={imageLeft ? '' : 'md:mt-16'}>
-                <a
-                  href={`/works/${p.slug}`}
-                  className={`group block ${imageLeft ? '' : 'md:text-right'}`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    const card = e.currentTarget.querySelector<HTMLElement>('[data-flip-card]')
-                    if (card) openProject(p.slug, card)
-                  }}
-                  onMouseEnter={() => prefetch(`/works/${p.slug}`)}
-                >
-                  {/* Flip source — the frame that morphs into the detail hero.
-                    data-swing names the corner it hangs from. */}
+                <div className={`block ${imageLeft ? '' : 'md:text-right'}`}>
+                  {/* data-swing names the corner the frame hangs from. */}
                   <div
                     data-swing={imageLeft ? 'left' : 'right'}
-                    data-flip-card
-                    data-flip-id={`project-${p.slug}`}
                     className="aspect-4/3 overflow-hidden rounded-xl"
                   >
                     {/* The lag effect writes this wrapper's transform, so the
@@ -256,7 +242,7 @@ export function WorksIndex() {
                         width={1200}
                         height={900}
                         sizes="(max-width: 768px) 90vw, 46vw"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="h-full w-full object-cover"
                       />
                     </div>
                   </div>
@@ -279,7 +265,7 @@ export function WorksIndex() {
                   <span data-row-meta className="type-mono mt-3 block opacity-60">
                     {p.services[0]} — {p.year}
                   </span>
-                </a>
+                </div>
               </li>
             )
           })}

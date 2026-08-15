@@ -4,8 +4,6 @@ import Image from "next/image";
 import { gsap, useGSAP, ScrollTrigger, SplitText } from "@/src/lib/gsap";
 import type { Project } from "@/src/data/projects";
 import { ProjectVideo } from "@/src/components/ProjectVideo";
-import { MagneticButton } from "@/src/components/MagneticButton";
-import { useTransition } from "@/src/components/transition/TransitionProvider";
 
 /**
  * Full-bleed dark section, one per project (§6). The section pins while the
@@ -27,7 +25,6 @@ export function ProjectSection({
   const cardRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const { navigate } = useTransition();
 
   useGSAP(
     () => {
@@ -153,9 +150,10 @@ export function ProjectSection({
               {project.title}
             </h2>
           </div>
-          <MagneticButton onClick={() => navigate(`/works/${project.slug}`)}>
-            View more
-          </MagneticButton>
+          {/* No CTA: the case-study pages this used to open are gone, and a
+              button with nowhere to go is worse than no button. The summary
+              carries the section instead. */}
+          <p className="type-mono max-w-[34ch] opacity-70">{project.summary}</p>
         </div>
       </div>
     </section>

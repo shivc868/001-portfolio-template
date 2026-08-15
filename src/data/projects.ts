@@ -1,128 +1,119 @@
 export type Project = {
-  slug: string;
-  title: string;
-  client: string;
-  year: number;
-  services: string[];
+  slug: string
+  title: string
+  client: string
+  year: number
+  services: string[]
   /** One-line summary shown on index rows and cards. */
-  summary: string;
+  summary: string
   /** Longer case-study paragraphs for the detail page. */
-  description: string[];
-  poster: string;
-  video: string;
-  images: string[];
-};
+  description: string[]
+  poster: string
+  video: string
+  images: string[]
+}
 
 export const projects: Project[] = [
   {
-    slug: "halbtags",
-    title: "Halbtags",
-    client: "Halbtags Journal",
+    slug: 'halcyon',
+    title: 'Halcyon',
+    client: 'Halcyon Type',
     year: 2026,
-    services: ["Art Direction", "Editorial Design", "Photography"],
+    services: ['WebGL', 'Front-end', 'Motion'],
     summary:
-      "A quarterly print journal about working less. Identity, grid system and cover photography for the first four issues.",
+      'A type foundry storefront where every specimen is live text rendered through a shader — no images, fully selectable.',
     description: [
-      "Halbtags is a Berlin print quarterly about the four-day week, slow careers and what people do with the hours they win back. The publishers wanted something that felt closer to a workwear catalogue than a think-piece magazine.",
-      "We built the identity around a compressed masthead and a strict two-column grid that the photography is allowed to break. Covers are shot on location with available light — no studio, no retouching beyond the duotone pass that ties every issue to its seasonal colour.",
-      "The first issue sold through its 4,000-copy run in six weeks and the masthead now anchors the journal's events series and podcast artwork.",
+      'Halcyon sells variable fonts, and their old specimen pages were flat PNGs: beautiful, unselectable, and impossible to keep in sync with the actual font files. The brief was to make the specimens real text again without losing the art direction.',
+      'Every specimen renders as live DOM text with a WebGL layer sampling it as a texture, so the distortion, chromatic split and weight-axis morph all run on real glyphs. Screen readers get the plain text, search engines index it, and the shader degrades to static type when WebGL is unavailable.',
+      'Draw calls are batched per specimen block and the render loop pauses on IntersectionObserver, so a page with fourteen live specimens still holds sixty frames on a four-year-old laptop.',
     ],
-    poster: "/media/halbtags-vibrant-main.jpg",
-    video: "/media/halbtags.mp4",
-    images: ["/media/halbtags-vibrant-bg.jpg", "/media/halbtags-02.jpg"],
+    poster: '/media/halbtags-vibrant-main.jpg',
+    video: '/media/halbtags.mp4',
+    images: ['/media/halbtags-vibrant-bg.jpg', '/media/halbtags-02.jpg'],
   },
   {
-    slug: "nordwand",
-    title: "Nordwand",
-    client: "Nordwand Apparel",
+    slug: 'northface-labs',
+    title: 'Northface',
+    client: 'Northface Labs',
     year: 2025,
-    services: ["Campaign", "Photography", "Motion"],
+    services: ['WebGL', 'Motion', 'Performance'],
     summary:
-      "Autumn campaign for a Munich alpine apparel label — shot over nine days on the Zugspitze, cut into a 60-second hero film.",
+      'Product launch site for an alpine hardware label — a scroll-driven terrain scene rendered from real elevation data.',
     description: [
-      "Nordwand makes technical shells for people who actually climb, and their previous campaigns looked like everyone else's: drone shots, summit poses, orange sunsets. The brief was to make weather the protagonist instead.",
-      "We shot for nine days in deliberately bad conditions — fog, sleet, flat light — and let the garments' silhouettes carry the frame. The hero film cuts between 16mm and phone footage from the climbing team's own archive.",
-      "The campaign ran out-of-home in Munich and Innsbruck and doubled the label's direct sales quarter over quarter.",
+      'Northface wanted the launch page to put you on the mountain rather than show you a photo of one. We built the hero as a Three.js terrain generated from public elevation tiles of the actual route their team tested on.',
+      'Scroll drives a single GSAP timeline that moves the camera, shifts the fog density and swaps the shader between three weather states. The whole sequence is one scrubbed timeline, so scrubbing backwards is exactly as smooth as scrubbing forwards.',
+      'The terrain mesh is decimated at four LOD levels and streamed as compressed binary, bringing the hero to 780KB total. Mobile drops to a pre-baked video and the timeline drives that instead.',
     ],
-    poster: "/media/nordwand-vibrant-main.jpg",
-    video: "/media/nordwand.mp4",
-    images: ["/media/nordwand-vibrant-bg.jpg", "/media/nordwand-02.jpg"],
+    poster: '/media/nordwand-vibrant-main.jpg',
+    video: '/media/nordwand.mp4',
+    images: ['/media/nordwand-vibrant-bg.jpg', '/media/nordwand-02.jpg'],
   },
   {
-    slug: "studio-brut",
-    title: "Studio Brut",
-    client: "Studio Brut",
+    slug: 'studio-brut',
+    title: 'Studio Brut',
+    client: 'Studio Brut',
     year: 2025,
-    services: ["Brand Identity", "Web Design"],
+    services: ['Front-end', 'Design systems'],
     summary:
-      "Identity and web presence for a furniture workshop casting concrete and aluminium in a former Lichtenberg substation.",
+      'Site and component library for a furniture workshop casting concrete and aluminium — heavy, exact, nothing decorative.',
     description: [
-      "Studio Brut's founders are two structural engineers who started casting furniture because they were bored of bridges. The work is heavy, exact and completely unornamented — the identity had to be the same.",
-      "The wordmark is set in a single weight with no logo beyond it. Product photography treats each piece like a civil-engineering document: elevation, section, detail, always against the same grey.",
-      "The site is one page per object with the object's full pour documentation. Nothing animates except the numbers.",
+      "Studio Brut's founders are structural engineers who started casting furniture because they were bored of bridges. The work is heavy, exact and completely unornamented — the build had to be the same.",
+      'One page per object, each rendered from the object\'s real pour documentation as structured data. The component library is eleven primitives and no variants; anything a page needs beyond that is a composition, not a new component.',
+      'Nothing animates except the numbers. The whole site ships 34KB of JavaScript and scores 100 on every Lighthouse axis, which the founders liked considerably more than any animation would have.',
     ],
-    poster: "/media/studio-brut-vibrant-main.jpg",
-    video: "/media/studio-brut.mp4",
-    images: ["/media/studio-brut-vibrant-bg.jpg", "/media/studio-brut-02.jpg"],
+    poster: '/media/studio-brut-vibrant-main.jpg',
+    video: '/media/studio-brut.mp4',
+    images: ['/media/studio-brut-vibrant-bg.jpg', '/media/studio-brut-02.jpg'],
   },
   {
-    slug: "kassette",
-    title: "Kassette",
-    client: "Kassette Records",
+    slug: 'kassette',
+    title: 'Kassette',
+    client: 'Kassette Audio',
     year: 2024,
-    services: ["Art Direction", "Packaging", "Motion"],
+    services: ['WebGL', 'Motion', 'Front-end'],
     summary:
-      "Sleeve system and release visuals for an electronic label pressing thirty records a year across three sub-imprints.",
+      'A label player where the artwork is generated from the audio itself — one shader, thirty releases, no designer in the loop.',
     description: [
-      "Kassette releases too much music for bespoke covers, so we designed a generative sleeve system instead: one typographic grid, three imprint colours, and a waveform-driven pattern engine the label runs themselves.",
-      "Every release gets a unique cover no designer touched, but the shelf reads as one label. The pattern engine also renders the loop visuals the label uses for streaming and club projections.",
-      "Three years in, the system has produced ninety-four covers and survived two imprint launches without a redesign.",
+      'Kassette releases too much music for bespoke cover art, so instead of covers we built a pattern engine: the label uploads a track, the Web Audio API analyses it, and a GLSL shader renders a cover unique to that waveform.',
+      "The same engine drives the player's live visualiser and the loop videos the label uses for streaming and club projections — one shader, three output sizes, rendered to canvas and exported straight from the browser.",
+      'Three years in it has produced ninety-four covers with no designer touching any of them, and the shelf still reads as one label.',
     ],
-    poster: "/media/kassette-poster.jpg",
-    video: "/media/kassette.mp4",
-    images: ["/media/kassette-01.jpg", "/media/kassette-02.jpg"],
+    poster: '/media/kassette-poster.jpg',
+    video: '/media/kassette.mp4',
+    images: ['/media/kassette-01.jpg', '/media/kassette-02.jpg'],
   },
   {
-    slug: "feldweg",
-    title: "Feldweg",
-    client: "Feldweg Reisen",
+    slug: 'fieldnote',
+    title: 'Fieldnote',
+    client: 'Fieldnote',
     year: 2024,
-    services: ["Brand Identity", "Editorial Design", "Photography"],
+    services: ['Front-end', 'Motion', 'Design systems'],
     summary:
-      "Rebrand for a slow-travel operator running walking routes between small-town guesthouses in Brandenburg and Saxony.",
+      'A slow-travel booking flow rebuilt as one continuous page — no steps, no wizard, no losing your place.',
     description: [
-      "Feldweg books walking holidays nobody would call spectacular — flat fields, pine forests, lakes you've never heard of. The old brand apologised for that with stock-photo mountains. The new one commits to it.",
-      "We photographed the actual routes in the flattest possible light and set the identity in a warm grotesque with hand-drawn route markers. Every guidebook spread pairs a full-bleed field with a single line of walking notes.",
-      "Bookings from travellers under forty tripled in the first season after launch.",
+      'Fieldnote books walking holidays through small-town guesthouses, and their old booking flow was a five-step wizard that lost 60% of people between steps two and three. The new one is a single page that never navigates.',
+      'Every choice expands the next section in place using FLIP, so the page you started on is the page you finish on and your earlier answers stay visible above you. Browser back works, deep links work, and the whole state lives in the URL.',
+      'Completion rate went from 38% to 71% in the first quarter, and support tickets asking "did my booking go through" stopped almost entirely.',
     ],
-    poster: "/media/feldweg-vibrant-main.jpg",
-    video: "/media/feldweg.mp4",
-    images: ["/media/feldweg-vibrant-bg.jpg", "/media/feldweg-02.jpg"],
+    poster: '/media/feldweg-vibrant-main.jpg',
+    video: '/media/feldweg.mp4',
+    images: ['/media/feldweg-vibrant-bg.jpg', '/media/feldweg-02.jpg'],
   },
   {
-    slug: "anthrazit",
-    title: "Anthrazit",
-    client: "Verlag Neue Masse",
+    slug: 'monolith',
+    title: 'Monolith',
+    client: 'Monolith Cloud',
     year: 2023,
-    services: ["Editorial Design", "Photography"],
+    services: ['Front-end', 'Design systems', 'Performance'],
     summary:
-      "A 320-page monograph on post-war concrete housing estates, photographed across two winters in six German cities.",
+      'Docs platform for an infrastructure company — 2,400 pages, instant search, and a build that finishes in under a minute.',
     description: [
-      "Anthrazit documents the Großwohnsiedlungen — the concrete estates everyone photographs as ruins — as places where people actually live. Two winters, six cities, one lens, no people asked to pose.",
-      "The book runs photography full-bleed with captions banished to a sewn-in appendix, so the estates get the uninterrupted spreads architecture monographs usually reserve for museums.",
-      "It went to a second printing in four months and the series was acquired by the Museum für Fotografie for its permanent collection.",
+      'Monolith had 2,400 documentation pages across six products and a docs build that took nineteen minutes, which meant nobody wanted to fix a typo. The rebuild treated build time as the primary design constraint.',
+      'Content is MDX compiled at the route level with an incremental cache, and search runs entirely client-side against a 90KB prebuilt index — no search service, no network round trip, results as you type.',
+      'Full builds now finish in 48 seconds and incremental ones in under three. Documentation contributions from engineers outside the docs team went up fourfold in six months.',
     ],
-    poster: "/media/anthrazit-poster.jpg",
-    video: "/media/anthrazit.mp4",
-    images: ["/media/anthrazit-01.jpg", "/media/anthrazit-02.jpg"],
+    poster: '/media/anthrazit-poster.jpg',
+    video: '/media/anthrazit.mp4',
+    images: ['/media/anthrazit-01.jpg', '/media/anthrazit-02.jpg'],
   },
-];
-
-export function getProject(slug: string): Project | undefined {
-  return projects.find((p) => p.slug === slug);
-}
-
-export function nextProject(slug: string): Project {
-  const i = projects.findIndex((p) => p.slug === slug);
-  return projects[(i + 1) % projects.length];
-}
+]

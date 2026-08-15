@@ -4,13 +4,20 @@ import Image from 'next/image'
 import {gsap, useGSAP, ScrollTrigger} from '@/src/lib/gsap'
 import {site} from '@/src/data/site'
 import {onPageReveal} from '@/src/lib/loadGate'
-import {HeroConfetti} from '@/src/components/HeroConfetti'
+import {HeroConfetti, CONFETTI_COLORS} from '@/src/components/HeroConfetti'
 
-const RING_PHRASE = 'Art Direction · Photography · Berlin · Brand Identity · Editorial · '
+const RING_PHRASE = 'Creative Dev · WebGL · Bengaluru · Motion · Front End · '
 const RING_REPEATS = 4 // must stay even so the loop seam lands on a phrase boundary; more repeats = tighter letter spacing
 const RING_FONT = 28
 const STAR_SIZE = 35
 const STAR_POOL = 10
+// The glyphs' visual centre sits ~0.35em above the baseline, so the text is
+// nudged inward by that much to ride the centre of its strip instead of
+// floating above it. The stars follow the same line.
+const RING_DY = RING_FONT * 0.35
+const STRIP_W = RING_FONT * 1.3
+const STRIP_PAD = 0.4 // strip overhang past the word, in monospace chars
+const STRIP_COUNT = [...RING_PHRASE].filter((ch) => ch === '·').length * RING_REPEATS
 
 /**
  * Marquee text riding the border of the subject's arch (semicircle top,
@@ -61,26 +68,42 @@ function ArchMarquee() {
       const perChar = (2 * L) / repeated.length
       const sepChars = [...repeated].flatMap((ch, i) => (ch === '·' ? [i] : []))
       const stars = box.querySelectorAll<SVGImageElement>('[data-ring-star]')
+      // <use> clones of the arch path — stroke-dasharray/-dashoffset are
+      // inherited properties, so setting them here reaches the cloned geometry
+      const strips = box.querySelectorAll<SVGUseElement>('[data-ring-strip]')
+
+      // Each word sits between two separators as "· WORD ·", so its glyphs run
+      // from sep+2 to nextSep-2. The leading virtual separator at -2 gives the
+      // very first word (which has no separator before it) a strip too.
+      const bounds = [-2, ...sepChars]
+      const words = bounds.slice(0, -1).map((g, i) => ({
+        from: g + 2 - STRIP_PAD,
+        to: bounds[i + 1] - 1 + STRIP_PAD,
+      }))
 
       const place = (offset: number) => {
         tp.setAttribute('startOffset', String(offset))
+
+        // Strips are stroked slices of the same path, so they curve with it for
+        // free — a dash the length of the word, pushed to the word's position.
+        words.forEach((w, i) => {
+          const el = strips[i]
+          if (!el) return
+          const s0 = offset + w.from * perChar
+          const len = (w.to - w.from) * perChar
+          // period > L keeps the pattern's neighbouring dashes off the path
+          el.setAttribute('stroke-dasharray', `${len} ${2 * L}`)
+          el.setAttribute('stroke-dashoffset', String(-s0))
+        })
+
         let used = 0
         for (const g of sepChars) {
           const s = offset + (g + 0.5) * perChar
           if (s < 0 || s > L || used >= stars.length) continue
           const pt = path.getPointAtLength(s)
-          // offset outward along the path normal so the star sits on the
-          // glyph line, not the baseline
-          const a = path.getPointAtLength(Math.max(0, s - 1))
-          const b = path.getPointAtLength(Math.min(L, s + 1))
-          const len = Math.hypot(b.x - a.x, b.y - a.y) || 1
-          const nx = (b.y - a.y) / len
-          const ny = -(b.x - a.x) / len
-          const cx = pt.x + nx * RING_FONT * 0.35
-          const cy = pt.y + ny * RING_FONT * 0.35
           const el = stars[used++]
-          el.setAttribute('x', String(cx - STAR_SIZE / 2))
-          el.setAttribute('y', String(cy - STAR_SIZE / 2))
+          el.setAttribute('x', String(pt.x - STAR_SIZE / 2))
+          el.setAttribute('y', String(pt.y - STAR_SIZE / 2))
           el.style.display = 'block'
         }
         for (let i = used; i < stars.length; i++) stars[i].style.display = 'none'
@@ -113,7 +136,18 @@ function ArchMarquee() {
   return (
     <div
       ref={boxRef}
-      className="pointer-events-none absolute bottom-0 left-1/2 h-[calc(80svh+1.5rem)] w-[calc(min(90vw,78svh)+3rem)] -translate-x-1/2 opacity-0"
+      // The box hangs 16rem BELOW the section, with its height grown by the
+      // same 16rem so the top edge — and therefore the arc, which is measured
+      // from it — stays exactly where it was.
+      //
+      // The path closes along the bottom, so its two corners turn a hard 90°,
+      // and text and strips bending round that turn are visible whenever a
+      // corner is on screen. Dropping them past the section's overflow-hidden
+      // edge hides the turn without opening the loop, which would change every
+      // glyph's spacing. 16rem, not a token gap: the hero drifts up 180px on
+      // the pin's scrub, so anything less brings the corners back into view at
+      // the end of the scroll.
+      className="pointer-events-none absolute -bottom-64 left-1/2 h-[calc(80svh+18rem)] w-[calc(min(90vw,78svh)+4rem)] -translate-x-1/2 opacity-0"
       aria-hidden="true"
     >
       {geom.d && (
@@ -121,7 +155,22 @@ function ArchMarquee() {
           <defs>
             <path id="hero-arch" ref={pathRef} d={geom.d} fill="none" />
           </defs>
+          {/* One tinted strip per word, painted under the glyphs */}
+          <g fill="none" strokeWidth={STRIP_W} strokeLinecap="butt" opacity={0.4}>
+            {Array.from({length: STRIP_COUNT}, (_, i) => (
+              <use
+                key={i}
+                data-ring-strip
+                href="#hero-arch"
+                stroke={CONFETTI_COLORS[i % CONFETTI_COLORS.length]}
+                // place() overwrites this on the first frame; 0 means a bailed
+                // effect shows nothing rather than a full-arch colour stack
+                strokeDasharray={0}
+              />
+            ))}
+          </g>
           <text
+            dy={RING_DY}
             fill="var(--chalk)"
             fontSize={RING_FONT}
             style={{fontFamily: 'var(--font-mono-util), monospace', textTransform: 'uppercase'}}
@@ -207,7 +256,7 @@ export function Hero() {
           const xTo = gsap.quickTo(img, 'x', {duration: 0.8, ease: 'power3.out'})
           const yTo = gsap.quickTo(img, 'y', {duration: 0.8, ease: 'power3.out'})
           const onMove = (e: PointerEvent) => {
-            xTo((e.clientX / window.innerWidth - 0.5) * 24)
+            xTo((e.clientX / window.innerWidth - 0.5) * 64)
             yTo((e.clientY / window.innerHeight - 0.5) * 16)
           }
           window.addEventListener('pointermove', onMove, {passive: true})
@@ -289,6 +338,14 @@ export function Hero() {
             className="object-cover object-top"
             onLoad={onHeroImgLoad}
           />
+          {/* Bottom-weighted scrim. The signature is white and this subject is
+              lit far brighter than the dark studio cutout the hero was built
+              around, so without it the name washes out against her shirt. It
+              fades out by 70% so her face stays untouched. */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-linear-to-t from-ink/85 via-ink/15 via-40% to-transparent to-70%"
+          />
         </div>
       </div>
 
@@ -297,7 +354,9 @@ export function Hero() {
         className="relative px-4 pb-[14svh] text-center text-chalk md:pb-[8svh]"
         aria-hidden="true"
       >
-        <span ref={wordRef} className="type-display block leading-[1.3] opacity-0">
+        {/* whitespace-nowrap: the signature is a name, and a name that wraps
+            mid-way reads as two names. It scales with vw instead. */}
+        <span ref={wordRef} className="type-signature block whitespace-nowrap opacity-0">
           {state.word}
         </span>
       </div>

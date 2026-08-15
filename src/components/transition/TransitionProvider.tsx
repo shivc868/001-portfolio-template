@@ -1,25 +1,12 @@
 'use client'
 import {createContext, useCallback, useContext, useEffect, useRef} from 'react'
 import {usePathname, useRouter} from 'next/navigation'
-import {gsap, Flip, ScrollSmoother, ScrollTrigger, SplitText} from '@/src/lib/gsap'
-import {getProject} from '@/src/data/projects'
+import {gsap, ScrollSmoother, ScrollTrigger, SplitText} from '@/src/lib/gsap'
 import {markPageRevealed, resetPageReveal} from '@/src/lib/loadGate'
 
-type FlipHandoff = {
-  state: ReturnType<typeof Flip.getState>
-  slug: string
-}
-
-type NavigateOptions = {
-  /** Hands a Flip snapshot to the destination for the shared-element morph. */
-  flip?: FlipHandoff
-}
-
 type TransitionContextValue = {
-  navigate: (href: string, options?: NavigateOptions) => void
+  navigate: (href: string) => void
   prefetch: (href: string) => void
-  /** Consumed once by the works detail hero for the shared-element morph. */
-  takeFlip: (slug: string) => FlipHandoff | null
   isTransitioning: () => boolean
 }
 
@@ -33,18 +20,13 @@ export function useTransition(): TransitionContextValue {
 
 /** The name the curtain announces. Matches the nav's wording, not the route. */
 const ROUTE_LABELS: Record<string, string> = {
-  '/': 'Maren Voss',
-  '/works': 'Design',
-  '/photography': 'Photography',
+  '/': 'Akansha S.',
+  '/works': 'Work',
   '/about': 'About',
   '/contact': 'Contact',
 }
 
 function routeLabel(href: string): string {
-  if (href.startsWith('/works/')) {
-    const slug = href.slice('/works/'.length)
-    return getProject(slug)?.title ?? slug.replace(/-/g, ' ')
-  }
   return ROUTE_LABELS[href] ?? href.replace(/^\//, '')
 }
 
@@ -103,26 +85,22 @@ export function TransitionProvider({children}: {children: React.ReactNode}) {
   const splitRef = useRef<SplitText | null>(null)
   const busyRef = useRef(false)
   const coveredRef = useRef(false)
-  const flipRef = useRef<FlipHandoff | null>(null)
   const failsafeRef = useRef<number | null>(null)
 
   const prefetch = useCallback((href: string) => router.prefetch(href), [router])
 
   const navigate = useCallback<TransitionContextValue['navigate']>(
-    (href, options) => {
+    (href) => {
       // Guard: ignore double-clicks mid-transition, and no-op same-route links.
       if (busyRef.current || href === window.location.pathname) return
       busyRef.current = true
-      flipRef.current = options?.flip ?? null
       // The incoming page's entrance waits for the curtain to clear again.
       resetPageReveal()
 
       const overlay = overlayRef.current
       const label = labelRef.current
 
-      // Shared-element navigations (§7B) skip the curtain — the whole point is
-      // watching the card morph into the destination hero.
-      if (options?.flip || !overlay || !label) {
+      if (!overlay || !label) {
         coveredRef.current = false
         router.push(href)
         return
@@ -178,15 +156,6 @@ export function TransitionProvider({children}: {children: React.ReactNode}) {
     [router],
   )
 
-  const takeFlip = useCallback<TransitionContextValue['takeFlip']>((slug) => {
-    const pending = flipRef.current
-    if (pending && pending.slug === slug) {
-      flipRef.current = null
-      return pending
-    }
-    return null
-  }, [])
-
   const isTransitioning = useCallback(() => busyRef.current, [])
 
   // Enter animation + scroll/trigger housekeeping on every route change (rule #8)
@@ -212,9 +181,9 @@ export function TransitionProvider({children}: {children: React.ReactNode}) {
 
         if (!overlay) return
         if (!coveredRef.current) {
-          // Flip morph, popstate or an interrupted navigation — no curtain to
-          // wait on, so release the entrance immediately rather than stalling
-          // any timeline gated on it.
+          // popstate or an interrupted navigation — no curtain to wait on, so
+          // release the entrance immediately rather than stalling any timeline
+          // gated on it.
           if (busyRef.current) {
             gsap.killTweensOf(overlay)
             gsap.set(overlay, {autoAlpha: 0, yPercent: 100})
@@ -269,7 +238,7 @@ export function TransitionProvider({children}: {children: React.ReactNode}) {
   }, [pathname])
 
   return (
-    <TransitionContext.Provider value={{navigate, prefetch, takeFlip, isTransitioning}}>
+    <TransitionContext.Provider value={{navigate, prefetch, isTransitioning}}>
       {children}
       {/* No inline transform here: GSAP drives the curtain with yPercent, and
           a CSS translateY(100%) would be parsed as a 900px pixel offset that

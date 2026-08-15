@@ -5,7 +5,7 @@ import { HomeRecognition } from "@/src/components/home/HomeRecognition";
 import { projects } from "@/src/data/projects";
 
 export const metadata: Metadata = {
-  title: "Maren Voss — Art Director & Photographer, Berlin",
+  title: "Akansha S. — Creative Developer, Bengaluru",
 };
 
 export default function Home() {
