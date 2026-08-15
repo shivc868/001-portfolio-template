@@ -1,0 +1,146 @@
+@import 'tailwindcss';
+
+:root {
+  /* Palette — Ultramarine pair. The gradient is the whole palette. */
+  --ink: #0b0b0c;
+  --paper: #f2f3f7;
+  --wash: #0b0b0c;
+  --chalk: #ece6e4;
+
+  --font-display: var(--font-clash-display);
+  --font-body: var(--font-archivo);
+  --font-mono-util: var(--font-plex-mono);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-wash: var(--wash);
+  --color-chalk: var(--chalk);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono-util);
+}
+
+html {
+  background: var(--ink);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-weight: 600;
+  overscroll-behavior: none;
+}
+
+/* The saturated wash — near-white into one saturated hue.
+   --wash is tweened by GSAP (hero states), so the gradient must read it live. */
+.wash-gradient {
+  background: linear-gradient(to bottom, var(--paper) 0%, var(--wash) 100%);
+}
+
+/* Footer surface — a hair lighter than --ink along the top edge so the footer
+   reads as its own plane instead of merging into the page background. */
+.footer-surface {
+  background: linear-gradient(to bottom, #17171b 0%, var(--ink) 55%);
+}
+
+/* Display type — heavy compressed grotesque, two lines nearly touching */
+.type-display {
+  font-family: var(--font-display), Impact, sans-serif;
+  font-size: clamp(4rem, 13vw, 8rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-kerning: auto;
+}
+
+.type-display-md {
+  font-family: var(--font-display), Impact, sans-serif;
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-weight: 700;
+  line-height: 0.88;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+/* Count-up figures — display face, sized to survive a three-up row.
+   tabular-nums stops the width jittering while the number ticks. */
+.type-stat {
+  font-family: var(--font-display), Impact, sans-serif;
+  font-size: clamp(2.75rem, 5vw, 4.5rem);
+  font-weight: 700;
+  /* 1, not the display face's usual sub-1 — the figures reveal out of an
+     overflow-hidden mask, and a short line box clips the glyphs. */
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Utility mono — indices, counts, captions */
+.type-mono {
+  font-family: var(--font-mono-util), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Small bold body copy (right-hand bio column) */
+.type-bio {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+/* Duotone pass: grayscale + screen so photography melts into the dark
+   gradient behind it — figure and ground share the palette (§4). */
+.duotone {
+  filter: grayscale(1) contrast(1.08) brightness(1.05);
+  mix-blend-mode: screen;
+}
+
+::selection {
+  background: var(--wash);
+  color: var(--chalk);
+}
+
+a {
+  color: inherit;
+}
+
+/* Visible keyboard focus sitewide */
+:focus-visible {
+  outline: 2px solid var(--wash);
+  outline-offset: 3px;
+}
+
+/* Nav roll-on-hover mask */
+.roll-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+.roll-stack {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+}
+
+/* Screen-reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
