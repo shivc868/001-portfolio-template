@@ -8,7 +8,8 @@ import {TransitionLink} from '@/src/components/transition/TransitionLink'
 const NAV_H = 72 // px — the band the inversion rig clips against
 
 const links = [
-  {label: 'Design', href: '/works'},
+  {label: 'Home', href: '/'},
+  {label: 'Work', href: '/works'},
   {label: 'About', href: '/about'},
   {label: 'Contact', href: '/contact'},
 ] as const
@@ -35,7 +36,10 @@ function NavRow({
         className="text-2xl font-semibold tracking-tight font-(family-name:--font-display)"
         tabIndex={interactive ? 0 : -1}
       >
-        Maren&nbsp;Voss<span className="text-wash">.</span>
+        {/* The dot is part of the name, so it keeps the text colour — the wash
+            accent the old wordmark used is near-black and disappears against
+            the dark nav, which read as "Akansha S". */}
+        Akansha.S
       </TransitionLink>
       <div className="hidden items-center gap-8 text-lg font-bold md:flex">
         {links.map((l) => (

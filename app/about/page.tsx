@@ -4,7 +4,7 @@ import { AboutContent } from "@/src/components/about/AboutContent";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Maren Voss — art director and photographer in Berlin. Identities, campaigns and books.",
+    "Akansha S. — creative developer in Bengaluru. WebGL, motion systems and production front-end.",
 };
 
 export default function AboutPage() {

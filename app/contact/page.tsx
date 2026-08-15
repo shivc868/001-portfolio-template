@@ -3,7 +3,7 @@ import { ContactContent } from "@/src/components/contact/ContactContent";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Start a project with Maren Voss — art direction, photography, brand.",
+  description: "Start a build with Akansha S. — WebGL, motion and creative front-end.",
 };
 
 export default function ContactPage() {

@@ -205,20 +205,26 @@ export function AboutContent() {
               The 6vw insets pull the two lines toward each other, and
               pr-[0.12em] pays back the tracking the last glyph gives away —
               without it the line mask crops the final letter. */}
+          {/* leading-[1.06], not the sub-1 the display face usually wants:
+              Clash's content box is 1.14em (89/25 ascent/descent per 100px)
+              and the lines reveal out of SplitText masks, so a short line box
+              clips every descender — the g in "shipping", the y in "years".
+              The negative margin-bottom gives back the 0.28em the taller line
+              box adds, keeping the pair as tight as it looks at 0.78. */}
           <span
             data-hero-line
-            className="type-display mr-[6vw] block pr-[0.12em] text-right leading-[0.78]!"
+            className="type-display mr-[6vw] block pr-[0.12em] text-right leading-[1.06]! -mb-[0.28em]"
           >
-            a decade of
+            five years of
           </span>
           <span className="flex flex-wrap items-end gap-x-8 gap-y-3">
             {/* shrink-0: as a flex child this line would otherwise give up
                 width to the chips beside it, and the mask then clips it. */}
             <span
               data-hero-line
-              className="type-display ml-[6vw] block shrink-0 pr-[0.12em] leading-[0.78]!"
+              className="type-display ml-[6vw] block shrink-0 pr-[0.12em] leading-[1.06]!"
             >
-              being specific
+              shipping it
             </span>
             <ul data-hero-fade className="mb-1 flex max-w-md flex-wrap gap-2">
               {HERO_TAGS.map((t) => (
@@ -252,12 +258,15 @@ export function AboutContent() {
               style={{aspectRatio: '4 / 5'}}
             >
               <Image
-                src="/media/portrait.jpg"
+                src="/media/akansha-sharma.png"
                 alt={`Portrait of ${site.name}`}
-                width={1000}
-                height={1250}
+                width={1023}
+                height={1537}
                 sizes="(max-width: 768px) 10rem, 13rem"
-                className="h-full w-full object-cover"
+                // object-top, not the default centre: the source is 2:3 in a
+                // 4:5 frame, so cover crops vertically — centred, that crop
+                // takes the top off her head.
+                className="h-full w-full object-cover object-top"
                 data-cursor-media
               />
             </div>
@@ -270,19 +279,19 @@ export function AboutContent() {
               data-reveal
               className="text-[clamp(1.9rem,4vw,3.6rem)] leading-[1.14] font-semibold tracking-[-0.04em] indent-[30%]"
             >
-              hello, i am {site.name.toLowerCase()}, an art director and photographer working across
-              brand, editorial and campaign work.
+              hello, i am {site.name.toLowerCase()}, a creative developer building websites where
+              the motion is part of the engineering, not applied afterwards.
             </p>
 
             <div className="mt-14 max-w-lg space-y-6 text-lg leading-relaxed opacity-70">
               <p data-reveal>
-                ten years of brand and editorial work taught one lesson worth keeping: specificity
-                beats volume. most work chases reach — the work that lasts is the work that could
-                only have been made for one client.
+                five years of shipping taught one lesson worth keeping: the interesting part is
+                never the idea, it is making it hold sixty frames on a mid-range android. most
+                showreel work would not survive that. the work that lasts is the work that ships.
               </p>
               <p data-reveal>
-                the studio takes on a handful of projects a year — identities, campaigns and books —
-                and photographs everything it designs.
+                i take on a handful of projects a year — webgl builds, motion systems and the
+                front-end that carries them — and i write the production code myself.
               </p>
             </div>
           </div>
@@ -301,8 +310,8 @@ export function AboutContent() {
               services
             </h2>
             <p data-reveal className="mt-6 max-w-xs text-lg leading-relaxed opacity-70">
-              positioning, brand and website, built as one thing. no handoffs, no drag, no cutting
-              corners on craft.
+              design, motion and build treated as one problem. no handoff gap, no animation bolted
+              on at the end, no shipping something that only runs on my machine.
             </p>
           </div>
 
