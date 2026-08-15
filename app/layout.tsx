@@ -1,5 +1,5 @@
 import type {Metadata} from 'next'
-import {Archivo, IBM_Plex_Mono} from 'next/font/google'
+import {Archivo, IBM_Plex_Mono, Great_Vibes} from 'next/font/google'
 import localFont from 'next/font/local'
 import './globals.css'
 import {site} from '@/src/data/site'
@@ -31,8 +31,15 @@ const plexMono = IBM_Plex_Mono({
   subsets: ['latin'],
 })
 
+// The hero signature — a single-weight script face, used in exactly one place
+const greatVibes = Great_Vibes({
+  variable: '--font-signature',
+  weight: '400',
+  subsets: ['latin'],
+})
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://marenvoss.example'),
+  metadataBase: new URL('https://akansha.example'),
   title: {
     default: `${site.name} — ${site.role}`,
     template: `%s — ${site.name}`,
@@ -49,7 +56,7 @@ export default function RootLayout({children}: LayoutProps<'/'>) {
   return (
     <html
       lang="en"
-      className={`${clashDisplay.variable} ${archivo.variable} ${plexMono.variable} antialiased`}
+      className={`${clashDisplay.variable} ${archivo.variable} ${plexMono.variable} ${greatVibes.variable} antialiased`}
     >
       <body>
         <TransitionProvider>

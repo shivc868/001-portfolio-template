@@ -1,9 +1,10 @@
-"use client";
-import { Fragment, useRef } from "react";
-import Image from "next/image";
-import { gsap, useGSAP, SplitText } from "@/src/lib/gsap";
-import { site } from "@/src/data/site";
-import { TransitionLink } from "@/src/components/transition/TransitionLink";
+'use client'
+import {Fragment, useRef} from 'react'
+import Image from 'next/image'
+import {gsap, useGSAP, SplitText} from '@/src/lib/gsap'
+import {site} from '@/src/data/site'
+import {TransitionLink} from '@/src/components/transition/TransitionLink'
+import {CONFETTI_COLORS} from '@/src/components/HeroConfetti'
 
 /**
  * Light bridge between the dark project deck and the dark footer: who the
@@ -21,11 +22,19 @@ import { TransitionLink } from "@/src/components/transition/TransitionLink";
  */
 
 /** Rules draw from the left; sits on top of whatever edge it decorates. */
-const RULE = "absolute inset-x-0 block h-px origin-left";
+const RULE = 'absolute inset-x-0 block h-px origin-left'
+
+/**
+ * Base height of the row-hover bar, in px. It is sized by scaleY rather than by
+ * an animated height so the tween composites instead of relaying out each
+ * frame; the base is large so the ratio stays precise (scaling a 1px box up ~80x
+ * compounds pixel rounding into a visibly short bar).
+ */
+const STRIP_BASE = 100
 
 /** Hover preview clip states — `round` keeps the corners through the wipe. */
-const CLIP_HIDDEN = "inset(0% 0% 100% 0% round 10px)";
-const CLIP_SHOWN = "inset(0% 0% 0% 0% round 10px)";
+const CLIP_HIDDEN = 'inset(0% 0% 100% 0% round 10px)'
+const CLIP_SHOWN = 'inset(0% 0% 0% 0% round 10px)'
 
 /**
  * Masked text — the child is what the timeline translates.
@@ -34,18 +43,18 @@ const CLIP_SHOWN = "inset(0% 0% 0% 0% round 10px)";
  * layout classes (col-span, alignment) have to land there. Type and colour
  * classes inherit down to the child, which is the part that moves.
  */
-function Reveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Reveal({children, className = ''}: {children: React.ReactNode; className?: string}) {
   return (
     <span className={`block overflow-hidden ${className}`}>
       <span data-mask className="block">
         {children}
       </span>
     </span>
-  );
+  )
 }
 
 /** Band header: mono label left, count right, rule drawing underneath. */
-function BandHeader({ label, count }: { label: string; count: number }) {
+function BandHeader({label, count}: {label: string; count: number}) {
   return (
     <div className="relative flex items-baseline justify-between pb-4">
       <span className="block overflow-hidden">
@@ -60,211 +69,271 @@ function BandHeader({ label, count }: { label: string; count: number }) {
       </span>
       <span data-rule className={`${RULE} bottom-0 bg-ink/15`} />
     </div>
-  );
+  )
 }
 
 export function HomeRecognition() {
-  const rootRef = useRef<HTMLElement>(null);
-  const headRef = useRef<HTMLHeadingElement>(null);
-  const wallRef = useRef<HTMLDivElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLElement>(null)
+  const headRef = useRef<HTMLHeadingElement>(null)
+  const wallRef = useRef<HTMLDivElement>(null)
+  const previewRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+  const stripRef = useRef<HTMLSpanElement>(null)
 
   useGSAP(
     () => {
-      const root = rootRef.current;
-      const head = headRef.current;
-      if (!root || !head) return;
+      const root = rootRef.current
+      const head = headRef.current
+      if (!root || !head) return
 
-      const mm = gsap.matchMedia();
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const mm = gsap.matchMedia()
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
         const q = <T extends Element>(sel: string, within: Element = root) =>
-          gsap.utils.toArray<T>(sel, within);
+          gsap.utils.toArray<T>(sel, within)
 
         // ── Intro: eyebrow rule wipes out, label and heading chars mask up
         const intro = gsap.timeline({
-          scrollTrigger: { trigger: "[data-intro]", start: "top 82%" },
-        });
+          scrollTrigger: {trigger: '[data-intro]', start: 'top 82%'},
+        })
         intro
-          .from("[data-eyebrow-rule]", {
+          .from('[data-eyebrow-rule]', {
             scaleX: 0,
-            transformOrigin: "left center",
+            transformOrigin: 'left center',
             duration: 0.9,
-            ease: "expo.inOut",
+            ease: 'expo.inOut',
           })
-          .from("[data-eyebrow]", { yPercent: 110, duration: 0.7, ease: "expo.out" }, 0.1);
+          .from('[data-eyebrow]', {yPercent: 110, duration: 0.7, ease: 'expo.out'}, 0.1)
 
-        let split: SplitText | null = null;
+        let split: SplitText | null = null
         document.fonts.ready.then(() => {
-          if (!headRef.current) return;
+          if (!headRef.current) return
           split = SplitText.create(head, {
-            type: "lines,chars",
-            mask: "lines",
+            type: 'lines,chars',
+            mask: 'lines',
             autoSplit: true,
             onSplit: (self) =>
               gsap.from(self.chars, {
                 yPercent: 110,
                 duration: 1.1,
                 stagger: 0.018,
-                ease: "expo.out",
-                scrollTrigger: { trigger: head, start: "top 85%" },
+                ease: 'expo.out',
+                scrollTrigger: {trigger: head, start: 'top 85%'},
               }),
-          });
-        });
+          })
+        })
 
         // ── Bands: header rule draws, then rows cascade out of their masks
-        const bandTimelines = q<HTMLElement>("[data-col]").map((band) => {
-          const tl = gsap.timeline({ scrollTrigger: { trigger: band, start: "top 82%" } });
-          tl.from(q("[data-col-label]", band), { yPercent: 110, duration: 0.7, ease: "expo.out" }, 0)
+        const bandTimelines = q<HTMLElement>('[data-col]').map((band) => {
+          const tl = gsap.timeline({scrollTrigger: {trigger: band, start: 'top 82%'}})
+          tl.from(q('[data-col-label]', band), {yPercent: 110, duration: 0.7, ease: 'expo.out'}, 0)
             .from(
-              q("[data-rule]", band),
-              { scaleX: 0, transformOrigin: "left center", duration: 1, ease: "expo.inOut" },
-              0.05
+              q('[data-rule]', band),
+              {scaleX: 0, transformOrigin: 'left center', duration: 1, ease: 'expo.inOut'},
+              0.05,
             )
             .from(
-              q("[data-mask]", band),
-              { yPercent: 110, duration: 0.9, stagger: 0.03, ease: "expo.out" },
-              0.15
-            );
+              q('[data-mask]', band),
+              {yPercent: 110, duration: 0.9, stagger: 0.03, ease: 'expo.out'},
+              0.15,
+            )
 
-          const itemRules = q("[data-item-rule]", band);
+          const itemRules = q('[data-item-rule]', band)
           if (itemRules.length) {
             tl.from(
               itemRules,
               {
                 scaleX: 0,
-                transformOrigin: "left center",
+                transformOrigin: 'left center',
                 duration: 0.8,
                 stagger: 0.05,
-                ease: "expo.out",
+                ease: 'expo.out',
               },
-              0.2
-            );
+              0.2,
+            )
           }
-          return tl;
-        });
+          return tl
+        })
 
         // ── Stats: rule draws, figures mask up and tick to their values
-        const statsBlock = root.querySelector("[data-stats]");
+        const statsBlock = root.querySelector('[data-stats]')
         const stats = gsap.timeline({
-          scrollTrigger: { trigger: statsBlock ?? root, start: "top 85%" },
-        });
+          scrollTrigger: {trigger: statsBlock ?? root, start: 'top 85%'},
+        })
         if (statsBlock) {
           stats
-            .from(q("[data-rule]", statsBlock), {
+            .from(q('[data-rule]', statsBlock), {
               scaleX: 0,
-              transformOrigin: "left center",
+              transformOrigin: 'left center',
               duration: 1.1,
-              ease: "expo.inOut",
+              ease: 'expo.inOut',
             })
             .from(
-              q("[data-stat]", statsBlock),
-              { yPercent: 110, duration: 1, stagger: 0.08, ease: "expo.out" },
-              0.12
+              q('[data-stat]', statsBlock),
+              {yPercent: 110, duration: 1, stagger: 0.08, ease: 'expo.out'},
+              0.12,
             )
             .from(
-              q("[data-stat-label]", statsBlock),
-              { autoAlpha: 0, y: 12, duration: 0.7, stagger: 0.08, ease: "power3.out" },
-              0.34
-            );
+              q('[data-stat-label]', statsBlock),
+              {autoAlpha: 0, y: 12, duration: 0.7, stagger: 0.08, ease: 'power3.out'},
+              0.34,
+            )
 
-          q<HTMLElement>("[data-count]", statsBlock).forEach((el, i) => {
-            const target = Number(el.dataset.count);
-            const suffix = el.dataset.suffix ?? "";
-            const n = { v: 0 };
-            el.textContent = `0${suffix}`;
+          q<HTMLElement>('[data-count]', statsBlock).forEach((el, i) => {
+            const target = Number(el.dataset.count)
+            const suffix = el.dataset.suffix ?? ''
+            const n = {v: 0}
+            el.textContent = `0${suffix}`
             stats.to(
               n,
               {
                 v: target,
                 duration: 1.8,
-                ease: "power2.out",
+                ease: 'power2.out',
                 onUpdate: () => {
-                  el.textContent = `${Math.round(n.v)}${suffix}`;
+                  el.textContent = `${Math.round(n.v)}${suffix}`
                 },
               },
-              0.12 + i * 0.08
-            );
-          });
+              0.12 + i * 0.08,
+            )
+          })
         }
 
         return () => {
-          split?.revert();
-          intro.kill();
-          stats.kill();
-          bandTimelines.forEach((t) => t.kill());
-        };
-      });
+          split?.revert()
+          intro.kill()
+          stats.kill()
+          bandTimelines.forEach((t) => t.kill())
+        }
+      })
 
       // ── Client wall: the hovered name's frame wipes up, riding the cursor.
       // Positioned against the wall rather than the viewport — ScrollSmoother
       // transforms the page, which would break position: fixed here.
-      mm.add("(prefers-reduced-motion: no-preference) and (pointer: fine)", () => {
-        const wall = wallRef.current;
-        const preview = previewRef.current;
-        if (!wall || !preview) return;
+      mm.add('(prefers-reduced-motion: no-preference) and (pointer: fine)', () => {
+        const wall = wallRef.current
+        const preview = previewRef.current
+        if (!wall || !preview) return
 
-        const layers = gsap.utils.toArray<HTMLElement>("[data-preview]", preview);
-        gsap.set(preview, { xPercent: -50, yPercent: -50, autoAlpha: 0 });
-        gsap.set(layers, { clipPath: CLIP_HIDDEN });
+        const layers = gsap.utils.toArray<HTMLElement>('[data-preview]', preview)
+        gsap.set(preview, {xPercent: -50, yPercent: -50, autoAlpha: 0})
+        gsap.set(layers, {clipPath: CLIP_HIDDEN})
 
-        const xTo = gsap.quickTo(preview, "x", { duration: 0.7, ease: "power3.out" });
-        const yTo = gsap.quickTo(preview, "y", { duration: 0.7, ease: "power3.out" });
+        const xTo = gsap.quickTo(preview, 'x', {duration: 0.7, ease: 'power3.out'})
+        const yTo = gsap.quickTo(preview, 'y', {duration: 0.7, ease: 'power3.out'})
 
-        let active = -1;
+        let active = -1
         const onMove = (e: PointerEvent) => {
-          const r = wall.getBoundingClientRect();
-          xTo(e.clientX - r.left);
-          yTo(e.clientY - r.top);
-        };
+          const r = wall.getBoundingClientRect()
+          xTo(e.clientX - r.left)
+          yTo(e.clientY - r.top)
+        }
 
         const hide = () => {
-          gsap.to(preview, { autoAlpha: 0, duration: 0.3, ease: "power2.out" });
-          gsap.to(layers, { clipPath: CLIP_HIDDEN, duration: 0.45, ease: "power3.out" });
-        };
+          gsap.to(preview, {autoAlpha: 0, duration: 0.3, ease: 'power2.out'})
+          gsap.to(layers, {clipPath: CLIP_HIDDEN, duration: 0.45, ease: 'power3.out'})
+        }
 
         const onOver = (e: PointerEvent) => {
-          const name = (e.target as HTMLElement).closest<HTMLElement>("[data-client]");
+          const name = (e.target as HTMLElement).closest<HTMLElement>('[data-client]')
           if (!name) {
             if (active !== -1) {
-              active = -1;
-              hide();
+              active = -1
+              hide()
             }
-            return;
+            return
           }
-          const i = Number(name.dataset.client);
-          if (i === active) return;
-          active = i;
+          const i = Number(name.dataset.client)
+          if (i === active) return
+          active = i
 
           // seed the position so the frame opens under the cursor, not mid-flight
-          const r = wall.getBoundingClientRect();
-          gsap.set(preview, { x: e.clientX - r.left, y: e.clientY - r.top });
+          const r = wall.getBoundingClientRect()
+          gsap.set(preview, {x: e.clientX - r.left, y: e.clientY - r.top})
 
-          gsap.to(preview, { autoAlpha: 1, duration: 0.3, ease: "power2.out" });
+          gsap.to(preview, {autoAlpha: 1, duration: 0.3, ease: 'power2.out'})
           layers.forEach((layer, j) => {
-            gsap.set(layer, { zIndex: j === i ? 2 : 1 });
+            gsap.set(layer, {zIndex: j === i ? 2 : 1})
             gsap.to(layer, {
               clipPath: j === i ? CLIP_SHOWN : CLIP_HIDDEN,
               scale: j === i ? 1 : 1.05,
               duration: j === i ? 0.75 : 0.45,
-              ease: "power3.out",
-            });
-          });
-        };
+              ease: 'power3.out',
+            })
+          })
+        }
 
-        wall.addEventListener("pointermove", onMove);
-        wall.addEventListener("pointerover", onOver);
-        wall.addEventListener("pointerleave", hide);
+        wall.addEventListener('pointermove', onMove)
+        wall.addEventListener('pointerover', onOver)
+        wall.addEventListener('pointerleave', hide)
         return () => {
-          wall.removeEventListener("pointermove", onMove);
-          wall.removeEventListener("pointerover", onOver);
-          wall.removeEventListener("pointerleave", hide);
-        };
-      });
+          wall.removeEventListener('pointermove', onMove)
+          wall.removeEventListener('pointerover', onOver)
+          wall.removeEventListener('pointerleave', hide)
+        }
+      })
 
-      return () => mm.revert();
+      // ── Recognition rows: a bar rides the hovered row. It is white and
+      // difference-blended rather than black, so the row's own text inverts
+      // under it — no second, restyled copy of the row to keep in sync.
+      mm.add('(prefers-reduced-motion: no-preference) and (pointer: fine)', () => {
+        const list = listRef.current
+        const strip = stripRef.current
+        if (!list || !strip) return
+
+        // scaleY here too: GSAP rewrites the whole transform, so the Tailwind
+        // scale-y-0 that covers the pre-JS state would otherwise be dropped
+        gsap.set(strip, {autoAlpha: 0, scaleY: 0, transformOrigin: 'top left'})
+
+        // quickTo, not a fresh gsap.to per hover: sweeping the cursor down the
+        // list retargets the same tween from its current velocity, where
+        // overwriting tweens would restart the ease and read as a stutter.
+        const yTo = gsap.quickTo(strip, 'y', {duration: 0.45, ease: 'power3'})
+        const scaleTo = gsap.quickTo(strip, 'scaleY', {duration: 0.45, ease: 'power3'})
+
+        let active: HTMLElement | null = null
+        const onOver = (e: PointerEvent) => {
+          const row = (e.target as HTMLElement).closest<HTMLElement>('[data-row]')
+          if (!row || !list.contains(row) || row === active) return
+          const opening = !active
+          active = row
+
+          // Rects, not offsetTop/offsetHeight: those round to whole pixels, so
+          // a fractional row height leaves the bar short of its rules. The
+          // shared ancestor's scroll transform cancels in the subtraction.
+          const rowRect = row.getBoundingClientRect()
+          const listRect = list.getBoundingClientRect()
+          const y = rowRect.top - listRect.top
+          const scaleY = rowRect.height / STRIP_BASE
+
+          // opening from hidden: seed both ends so the bar fades in on the row
+          // instead of sweeping down from wherever it was last left
+          if (opening) {
+            yTo(y, y)
+            scaleTo(scaleY, scaleY)
+          } else {
+            yTo(y)
+            scaleTo(scaleY)
+          }
+          gsap.to(strip, {autoAlpha: 1, duration: 0.3, ease: 'power2.out', overwrite: 'auto'})
+        }
+
+        const onLeave = () => {
+          active = null
+          gsap.to(strip, {autoAlpha: 0, duration: 0.3, ease: 'power2.out', overwrite: 'auto'})
+        }
+
+        list.addEventListener('pointerover', onOver)
+        list.addEventListener('pointerleave', onLeave)
+        return () => {
+          list.removeEventListener('pointerover', onOver)
+          list.removeEventListener('pointerleave', onLeave)
+        }
+      })
+
+      return () => mm.revert()
     },
-    { scope: rootRef }
-  );
+    {scope: rootRef},
+  )
 
   return (
     // relative z-10 lifts this section above the pinned project deck it scrolls over
@@ -273,14 +342,6 @@ export function HomeRecognition() {
       className="relative z-10 bg-paper px-5 pt-28 pb-28 text-ink md:px-10 md:pt-32"
     >
       <div data-intro>
-        <div className="flex items-center gap-4">
-          <span data-eyebrow-rule className="block h-px w-10 origin-left bg-ink/30" />
-          <span className="block overflow-hidden">
-            <span data-eyebrow className="type-mono block opacity-50">
-              Studio
-            </span>
-          </span>
-        </div>
         <h2 ref={headRef} className="type-display-md mt-6 max-w-[11em]">
           Clients &amp; recognition
         </h2>
@@ -295,7 +356,7 @@ export function HomeRecognition() {
             ref={previewRef}
             aria-hidden="true"
             className="pointer-events-none absolute top-0 left-0 z-20 w-[clamp(180px,15vw,260px)] opacity-0"
-            style={{ aspectRatio: "4 / 5" }}
+            style={{aspectRatio: '4 / 5'}}
           >
             {site.clients.map((c) => (
               <Image
@@ -318,8 +379,15 @@ export function HomeRecognition() {
                   <Reveal>{c.name}</Reveal>
                 </span>
                 {i < site.clients.length - 1 && (
-                  <span aria-hidden="true" className="px-3 opacity-25 md:px-4">
-                    ·
+                  // self-center: the row aligns on the baseline, which would
+                  // drop a fixed-height dot to sit on it rather than beside it
+                  <span aria-hidden="true" className="self-center px-3 md:px-4">
+                    <Reveal>
+                      <span
+                        className="block h-2 w-2 rounded-full"
+                        style={{background: CONFETTI_COLORS[i % CONFETTI_COLORS.length]}}
+                      />
+                    </Reveal>
                   </span>
                 )}
               </Fragment>
@@ -331,21 +399,35 @@ export function HomeRecognition() {
       {/* Recognition — full-width rows: year, awarding body, honour, the work */}
       <div data-col className="mt-24">
         <BandHeader label="Recognition" count={site.recognition.length} />
-        <ul className="mt-2">
-          {site.recognition.map((r) => (
-            <li key={`${r.org}-${r.year}-${r.work}`} className="relative">
-              <div className="grid grid-cols-1 gap-x-8 gap-y-1 py-5 md:grid-cols-12 md:items-baseline">
-                <Reveal className="type-mono opacity-50 md:col-span-2">{r.year}</Reveal>
-                <Reveal className="text-lg leading-snug font-bold md:col-span-4">{r.org}</Reveal>
-                <Reveal className="leading-snug opacity-60 md:col-span-4">{r.detail}</Reveal>
-                <Reveal className="type-mono opacity-50 md:col-span-2 md:text-right">
-                  {r.work}
-                </Reveal>
-              </div>
-              <span data-item-rule className={`${RULE} bottom-0 bg-ink/10`} />
-            </li>
-          ))}
-        </ul>
+        <div ref={listRef} className="relative mt-2">
+          <ul>
+            {site.recognition.map((r) => (
+              <li key={`${r.org}-${r.year}-${r.work}`} data-row className="relative">
+                <div className="grid grid-cols-1 gap-x-8 gap-y-1 py-3 md:grid-cols-12 md:items-baseline">
+                  <Reveal className="type-mono opacity-50 md:col-span-2">{r.year}</Reveal>
+                  <Reveal className="text-lg leading-snug font-bold md:col-span-4">{r.org}</Reveal>
+                  <Reveal className="leading-snug opacity-60 md:col-span-4">{r.detail}</Reveal>
+                  <Reveal className="type-mono opacity-50 md:col-span-2 md:text-right">
+                    {r.work}
+                  </Reveal>
+                </div>
+                <span data-item-rule className={`${RULE} bottom-0 bg-ink/10`} />
+              </li>
+            ))}
+          </ul>
+
+          {/* After the list, so it paints over the rows. White + difference
+              against the paper resolves to a black bar and inverts the ink
+              text under it in the same pass — no restyled copy of the row to
+              keep in sync. The section is its own stacking context
+              (relative z-10), so the blend stays inside this band. */}
+          <span
+            ref={stripRef}
+            aria-hidden="true"
+            style={{height: STRIP_BASE}}
+            className="pointer-events-none absolute inset-x-0 top-0 block origin-top scale-y-0 bg-white/80 opacity-0 mix-blend-difference will-change-transform"
+          />
+        </div>
       </div>
 
       {/* Figures + exit */}
@@ -379,10 +461,10 @@ export function HomeRecognition() {
             data-stat-label
             className="type-mono inline-block shrink-0 border-b border-current pb-1 transition-opacity duration-200 hover:opacity-60"
           >
-            More about the studio →
+            More about me →
           </TransitionLink>
         </div>
       </div>
     </section>
-  );
+  )
 }

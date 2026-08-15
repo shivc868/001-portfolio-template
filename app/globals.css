@@ -10,6 +10,7 @@
   --font-display: var(--font-clash-display);
   --font-body: var(--font-archivo);
   --font-mono-util: var(--font-plex-mono);
+  --font-script: var(--font-signature);
 }
 
 @theme inline {
@@ -53,6 +54,21 @@ body {
   line-height: 1.2;
   letter-spacing: -0.02em;
   font-kerning: auto;
+}
+
+/* The hero signature. A script face needs more size than a grotesque to read
+   at the same optical weight, and real line-height: its ascender loops and
+   descender tails overshoot the em box far more than Clash's do, so a tight
+   leading (or a line mask) crops them. */
+.type-signature {
+  font-family: var(--font-script), 'Brush Script MT', cursive;
+  /* Great Vibes runs ~7.8x its font-size across "Akansha Sharma", so 6.2vw
+     lands the signature just inside the arch (min(90vw, 78svh)) rather than
+     across the ring strips either side of it. */
+  font-size: clamp(2rem, 6.2vw, 5rem);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
 }
 
 .type-display-md {

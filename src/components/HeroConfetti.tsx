@@ -9,15 +9,27 @@
  * The squares mount hidden — each hero's own timeline fades `[data-confetti]`
  * in once its page reveal fires.
  */
+/** The confetti palette, also reused for the hero arch's word strips. */
+export const CONFETTI_COLORS = [
+  '#2f6df6',
+  '#ef7d2e',
+  '#ef6ea8',
+  '#a077e8',
+  '#63bd4c',
+  '#e8d07a',
+  '#e04b3c',
+  '#8fc5e8',
+] as const
+
 const CONFETTI = [
-  {x: '4%', y: '22%', c: '#2f6df6'},
-  {x: '26%', y: '84%', c: '#ef7d2e'},
-  {x: '31%', y: '6%', c: '#ef6ea8'},
-  {x: '45%', y: '52%', c: '#a077e8'},
-  {x: '62%', y: '72%', c: '#63bd4c'},
-  {x: '74%', y: '40%', c: '#e8d07a'},
-  {x: '86%', y: '72%', c: '#e04b3c'},
-  {x: '96%', y: '8%', c: '#8fc5e8'},
+  {x: '4%', y: '22%', c: CONFETTI_COLORS[0]},
+  {x: '26%', y: '84%', c: CONFETTI_COLORS[1]},
+  {x: '31%', y: '6%', c: CONFETTI_COLORS[2]},
+  {x: '45%', y: '52%', c: CONFETTI_COLORS[3]},
+  {x: '62%', y: '72%', c: CONFETTI_COLORS[4]},
+  {x: '74%', y: '40%', c: CONFETTI_COLORS[5]},
+  {x: '86%', y: '72%', c: CONFETTI_COLORS[6]},
+  {x: '96%', y: '8%', c: CONFETTI_COLORS[7]},
 ] as const
 
 export function HeroConfetti() {
